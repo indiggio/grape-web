@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ template "orange_web.fullname" . }}
+  labels:
+    app: {{ template "orange_web.name" . }}
+    chart: {{ template "orange_web.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  serviceName: {{ template "orange_web.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "orange_web.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "orange_web.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "orange_web.fullname" . }}-sa
+      securityContext:
+        runAsUser: 1000
+        fsGroup: 1000
+        runAsNonRoot: true
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env :
+            - name: "imageNameTag"
+              value: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            - name: "pullPolicy"
+              value: "{{ .Values.image.pullPolicy }}"
+            - name: "orange_webApp"
+              value: "{{ template "orange_web.name" . }}"
+            - name: "orange_webChart"
+              value: "{{ template "orange_web.chart" . }}"
+            - name: "orange_webRelease"
+              value: "{{ .Release.Name }}"
+            - name: "orange_webHeritage"
+              value: "{{ .Release.Service }}"
+            - name: namespace
+              value: {{ .Release.Namespace }}
+            {{- if .Values.config.demoMode }}
+            - name: "demoMode"
+              value: {{ quote .Values.config.demoMode }}
+            {{- end }}
+            - name: resources
+              value: {{ quote .Values.config.user_resources }}
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          ## livenessProbe:
+            ## httpGet:
+              ## path: /
+              ## port: http
+          ## readinessProbe:
+            ## httpGet:
+              ## path: /
+              ## port: http
+          resources:
+{{ toYaml .Values.config.resources | indent 12 }}
