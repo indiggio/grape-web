@@ -47,8 +47,6 @@ spec:
             - name: "demoMode"
               value: {{ quote .Values.config.demoMode }}
             {{- end }}
-            - name: resources
-              value: {{ quote .Values.config.user_resources }}
           ports:
             - name: http
               containerPort: 5000
