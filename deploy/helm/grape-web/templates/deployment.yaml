@@ -1,5 +1,5 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
 metadata:
   name: {{ template "orange_web.fullname" . }}
   labels:
@@ -63,3 +63,8 @@ spec:
               ## port: http
           resources:
 {{ toYaml .Values.config.resources | indent 12 }}
+  strategy:
+    canary:
+      steps:
+      - setWeight: 20
+      - pause: {}
