@@ -23,7 +23,7 @@ config:
       cpu: 2
 
 ingress:
-  enabled: true
+  enabled: false
   annotations:
     kubernetes.io/ingress.class: istio
     # kubernetes.io/tls-acme: "true"
